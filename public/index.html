@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FAF9F7">
+<title>World Cup 2026 — Matches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Pageloop-style light, warm, airy palette — soft off-white canvas, pure-white cards */
+    --bg:#FAF9F7; --bg-2:#F6F5F2; --surface:#FFFFFF; --surface-2:#F4F3F0; --line:rgba(0,0,0,.06);
+    --line-2:rgba(0,0,0,.10); --text:#1a1a1a; --muted:#6b6862; --faint:#9a968f;
+    --accent:#5b62d6; --accent-d:#FFFFFF; --on:#ffffff; --live:#e23b3b; --gold:#5b62d6; --r:18px;
+    /* soft layered depth used across cards */
+    --shadow:0 1px 2px rgba(20,20,20,.04), 0 4px 16px rgba(20,20,20,.05);
+    --shadow-lg:0 2px 6px rgba(20,20,20,.05), 0 12px 36px rgba(20,20,20,.08);
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:'Roboto Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:var(--sans); line-height:1.45; -webkit-font-smoothing:antialiased; letter-spacing:-0.01em}
+  .app{max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; background:var(--bg)}
+  /* shared mono uppercase label treatment — the signature of this aesthetic */
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
+  header{position:sticky; top:0; z-index:5; background:rgba(250,249,247,.85); -webkit-backdrop-filter:saturate(1.4) blur(12px); backdrop-filter:saturate(1.4) blur(12px); color:var(--text); padding:calc(16px + env(safe-area-inset-top)) 18px 14px; border-bottom:1px solid var(--line); position:relative; transition:border-color .4s ease}
+  header::after{content:""; position:absolute; left:18px; right:18px; bottom:-1px; height:2px; border-radius:999px; background:var(--accent); opacity:.85; transition:background .4s ease}
+  header .row1{display:flex; align-items:flex-start; justify-content:space-between; gap:8px}
+  header .t{font-size:17px; font-weight:700; letter-spacing:-0.02em; color:var(--text)} header .s{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:.08em}
+  header .sound{background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow); color:var(--text); width:36px; height:36px; border-radius:999px; font-size:15px; flex:0 0 auto}
+  .databar{font-family:var(--mono); font-size:10px; padding:7px 18px; text-align:center; text-transform:uppercase; letter-spacing:.12em; border-bottom:1px solid var(--line)}
+  .databar.sample{background:var(--bg-2); color:var(--faint)}
+  .databar.live{background:color-mix(in srgb, var(--accent) 9%, var(--bg-2)); color:var(--accent)}
+  .seg{display:flex; gap:6px; padding:16px 18px 6px}
+  .seg{background:transparent}
+  .seg button{flex:1; font-family:var(--mono); font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.1em; padding:10px 6px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--muted); box-shadow:var(--shadow); transition:background .3s,color .3s,border-color .3s,box-shadow .3s}
+  .seg button.on{background:var(--accent); color:var(--on); border-color:var(--accent); font-weight:600; box-shadow:0 2px 10px color-mix(in srgb, var(--accent) 30%, transparent)}
+  main{flex:1; padding:10px 18px 96px; overflow-y:auto}
+  .tab{display:none} .tab.on{display:block}
+  .day{font-family:var(--mono); font-size:10px; font-weight:600; color:var(--faint); text-transform:uppercase; letter-spacing:.14em; margin:22px 4px 10px}
+  .match{position:relative; background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:16px 16px; margin-bottom:12px; cursor:pointer; overflow:hidden; transition:box-shadow .2s ease, transform .12s ease, border-color .2s ease}
+  .match:active{box-shadow:var(--shadow-lg); transform:translateY(-1px); border-color:var(--line-2)}
+  .match .grp{font-family:var(--mono); font-size:10px; color:var(--faint); display:flex; justify-content:space-between; margin-bottom:12px; text-transform:uppercase; letter-spacing:.12em}
+  .live-badge{font-family:var(--mono); color:var(--live); font-weight:700; letter-spacing:.12em}
+  .row{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:7px 0}
+  .team{display:flex; align-items:center; gap:11px; min-width:0}
+  .flag{font-size:22px; width:26px; text-align:center} .crest{width:24px; height:24px; object-fit:contain}
+  .nm{font-size:15px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.01em}
+  .star{color:var(--accent)}
+  .score{font-family:var(--mono); font-size:18px; font-weight:700; min-width:22px; text-align:right; font-variant-numeric:tabular-nums; color:var(--text)}
+  .score.livepulse{animation:breathe 2.2s ease-in-out infinite; color:var(--live)}
+  @keyframes breathe{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+  .score.rolled{animation:roll .5s ease}
+  @keyframes roll{0%{transform:translateY(-60%);opacity:0}60%{transform:translateY(6%);opacity:1}100%{transform:translateY(0)}}
+  .match.flash{animation:cardflash .9s ease}
+  @keyframes cardflash{0%{box-shadow:var(--shadow)}30%{box-shadow:0 0 0 2px var(--accent), var(--shadow-lg)}100%{box-shadow:var(--shadow)}}
+  .match.flash-fav{animation:cardflashfav .9s ease}
+  @keyframes cardflashfav{0%{box-shadow:var(--shadow)}30%{box-shadow:0 0 0 2px var(--accent), 0 8px 28px color-mix(in srgb, var(--accent) 30%, transparent)}100%{box-shadow:var(--shadow)}}
+  .ko{font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .standtbl{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:16px}
+  .standtbl h4{margin:0; padding:13px 14px; font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); background:var(--surface-2); border-bottom:1px solid var(--line)}
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th,td{padding:11px 6px; text-align:center} th{font-family:var(--mono); color:var(--faint); font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:.1em}
+  td{font-family:var(--mono); font-variant-numeric:tabular-nums; color:var(--text)}
+  td.tn,th.tn{text-align:left; padding-left:14px; font-family:var(--sans)} td.tn{font-weight:600}
+  tr+tr td{border-top:1px solid var(--line)}
+  .q{color:var(--accent)} .empty{color:var(--muted); text-align:center; padding:48px 16px; font-size:14px}
+  nav{position:fixed; bottom:0; left:0; right:0; max-width:480px; margin:0 auto; background:rgba(255,255,255,.88); -webkit-backdrop-filter:saturate(1.4) blur(12px); backdrop-filter:saturate(1.4) blur(12px); border-top:1px solid var(--line); display:flex; padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1; background:none; border:none; color:var(--faint); padding:11px 0 13px; font-family:var(--mono); font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:.1em; transition:color .2s}
+  nav button .ic{display:block; font-size:18px; margin-bottom:3px; letter-spacing:0} nav button.on{color:var(--accent)}
+  .sheet{position:fixed; inset:0; z-index:20; background:rgba(26,26,26,.34); display:none; align-items:flex-end; backdrop-filter:blur(3px)}
+  .sheet.on{display:flex}
+  .sheet .panel{background:var(--surface); width:100%; max-width:480px; margin:0 auto; max-height:88vh; overflow-y:auto; border-radius:24px 24px 0 0; border:1px solid var(--line); border-bottom:none; box-shadow:0 -8px 40px rgba(20,20,20,.12); padding:18px 18px calc(22px + env(safe-area-inset-bottom))}
+  .sheet .x{float:right; background:none; border:none; font-size:22px; color:var(--muted)}
+  .mh{text-align:center; padding:8px 0 16px} .mh .big{font-family:var(--mono); font-size:30px; font-weight:700; margin:8px 0; letter-spacing:-0.01em; color:var(--text)} .mh .meta{font-family:var(--mono); font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em}
+  .sech{font-family:var(--mono); font-size:10px; font-weight:600; color:var(--faint); text-transform:uppercase; letter-spacing:.14em; margin:20px 4px 10px}
+  .btn{background:var(--surface); color:var(--text); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:12px 16px; font-size:14px; font-weight:600; transition:border-color .2s, box-shadow .2s}
+  .btn:active{border-color:var(--accent); box-shadow:var(--shadow-lg)}
+  /* press micro-interaction */
+  .press{transition:transform .08s ease} .press:active{transform:scale(.96)}
+  /* My-team hero card — refined, surface-layered, accent gradient on the favorited team */
+  .hero{position:relative; border-radius:18px; padding:20px 20px 20px 22px; margin:12px 0 16px; color:var(--text); overflow:hidden;
+    background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow)}
+  .hero::before{content:""; position:absolute; inset:0; background:linear-gradient(150deg, color-mix(in srgb, var(--hero-b,#5b62d6) 12%, transparent), transparent 56%); pointer-events:none}
+  .hero::after{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--hero-b,#5b62d6)}
+  .hero>*{position:relative}
+  .hero .htop{display:flex; align-items:center; gap:13px}
+  .hero .hcrest{width:48px; height:48px; object-fit:contain}
+  .hero .hflag{font-size:40px; line-height:1}
+  .hero .hname{font-size:19px; font-weight:700; letter-spacing:-0.02em; color:var(--text)}
+  .hero .hsub{font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:.12em}
+  .hero .hcd{display:flex; gap:8px; margin-top:16px}
+  .hero .seg-t{flex:1; background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:10px 4px; text-align:center}
+  .hero .seg-t b{display:block; font-family:var(--mono); font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-0.02em; color:var(--text)}
+  .hero .seg-t span{font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted)}
+  .hero .matchday{margin-top:16px; text-align:center; font-family:var(--mono); font-size:17px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--hero-b,#5b62d6); animation:mdpulse 1.6s ease-in-out infinite}
+  @keyframes mdpulse{0%,100%{opacity:.85}50%{opacity:1}}
+  .hero .hvs{margin-top:8px; font-size:13px; color:var(--muted); text-align:center}
+  /* predictions */
+  .pred{margin-top:14px; border-top:1px solid var(--line); padding-top:14px}
+  .pred .plabel{font-family:var(--mono); font-size:10px; color:var(--faint); margin-bottom:9px; font-weight:600; text-transform:uppercase; letter-spacing:.12em}
+  .pred .pchoices{display:flex; gap:10px}
+  .pchip{flex:1; display:flex; align-items:center; justify-content:center; gap:7px; padding:11px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); font-family:var(--mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); transition:transform .12s ease, border-color .2s, background .2s, color .2s, box-shadow .2s}
+  .pchip .crest,.pchip .flag{width:20px; font-size:18px}
+  .pchip.picked{border-color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, var(--surface)); color:var(--accent); box-shadow:0 2px 10px color-mix(in srgb, var(--accent) 22%, transparent); animation:lockin .35s ease}
+  @keyframes lockin{0%{transform:scale(1)}45%{transform:scale(1.07)}100%{transform:scale(1)}}
+  .verdict{margin-top:10px; font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--muted)}
+  .verdict.right{color:var(--accent)} .verdict.wrong{color:var(--live)}
+  .streak{display:inline-block; font-family:var(--mono); background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow); color:var(--text); border-radius:999px; padding:6px 13px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin:8px 6px 4px}
+  #fx{position:fixed; inset:0; pointer-events:none; z-index:40; display:none}
+  #fx.on{display:block}
+  /* header change-team button */
+  header .pick{background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow); color:var(--text); height:36px; padding:0 14px; border-radius:999px; font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; flex:0 0 auto; display:inline-flex; align-items:center; gap:7px}
+  header .pick .pf{font-size:15px; line-height:1; letter-spacing:0}
+  /* tournament countdown hero (pre-tournament / empty live) — refined product empty state */
+  .tourney{position:relative; border-radius:18px; padding:28px 20px; margin:14px 0 16px; color:var(--text); overflow:hidden; text-align:center;
+    background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow)}
+  .tourney::before{content:""; position:absolute; inset:0; background:radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%); pointer-events:none}
+  .tourney>*{position:relative}
+  .tourney .tball{position:absolute; right:-14px; top:-14px; font-size:88px; opacity:.08; transform:rotate(-12deg)}
+  .tourney .tk{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--accent)}
+  .tourney .tt{font-size:20px; font-weight:700; margin:10px 0 4px; letter-spacing:-0.02em; color:var(--text)}
+  .tourney .ts{font-size:13px; color:var(--muted)}
+  .tourney .tcd{display:flex; gap:8px; margin:20px 0 6px; justify-content:center}
+  .tourney .seg-t{flex:1; max-width:80px; background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:11px 4px}
+  .tourney .seg-t b{display:block; font-family:var(--mono); font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.1; letter-spacing:-0.02em; color:var(--text)}
+  .tourney .seg-t span{font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted)}
+  .tourney .tcta{display:inline-block; margin-top:18px; background:var(--accent); color:var(--on); border:none; border-radius:999px; box-shadow:0 2px 12px color-mix(in srgb, var(--accent) 30%, transparent); padding:12px 22px; font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em}
+  .tourney.live-on{animation:none}
+  /* first-run picker overlay */
+  .picker{position:fixed; inset:0; z-index:60; background:var(--bg); display:none; flex-direction:column; max-width:480px; margin:0 auto}
+  .picker.on{display:flex}
+  .picker .ptop{background:var(--bg-2); color:var(--text); padding:calc(30px + env(safe-area-inset-top)) 22px 24px; text-align:center; position:relative; overflow:hidden; border-bottom:1px solid var(--line)}
+  .picker .ptop::after{content:""; position:absolute; left:22px; right:22px; bottom:0; height:2px; border-radius:999px; background:var(--accent); opacity:.7}
+  .picker .ptop .pball{position:absolute; left:-10px; bottom:-24px; font-size:120px; opacity:.06; transform:rotate(-14deg)}
+  .picker .ptop .pk{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--accent)}
+  .picker .ptop h1{font-size:24px; font-weight:700; margin:12px 0 6px; letter-spacing:-0.02em; color:var(--text)}
+  .picker .ptop p{font-size:13px; color:var(--muted); margin:0}
+  .picker .pgrid{flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:18px 18px calc(20px + env(safe-area-inset-bottom))}
+  .picker .pcard{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:16px 6px 14px; text-align:center; cursor:pointer; transition:transform .1s ease, border-color .2s, box-shadow .2s}
+  .picker .pcard:active{transform:scale(.95); border-color:var(--accent); box-shadow:var(--shadow-lg)}
+  .picker .pcard .pflag{font-size:34px; line-height:1; display:block}
+  .picker .pcard .pn{font-size:12px; font-weight:600; margin-top:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text)}
+  .picker .pcard .pdot{width:100%; height:4px; border-radius:999px; margin-top:9px}
+  .picker .pskip{text-align:center; padding:4px 16px calc(16px + env(safe-area-inset-bottom))}
+  .picker .pskip button{background:none; border:none; color:var(--muted); font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; text-decoration:none; border-bottom:1px solid var(--line); padding-bottom:2px}
+  /* ── retention: matchday alert banner (Matches tab) ── */
+  .mdbanner{display:flex; align-items:center; gap:11px; background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:14px; box-shadow:var(--shadow); padding:13px 15px; margin:12px 0 4px; animation:mdpulse 2.2s ease-in-out infinite}
+  .mdbanner .mdico{font-size:20px; line-height:1; flex:0 0 auto}
+  .mdbanner .mdtxt{min-width:0}
+  .mdbanner .mdt{font-size:13px; font-weight:700; letter-spacing:-0.01em; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .mdbanner .mds{font-family:var(--mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:2px}
+  /* notify toggle */
+  .notifrow{display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:13px 15px; margin:12px 0}
+  .notifrow .nl{min-width:0}
+  .notifrow .nlt{font-size:13px; font-weight:600; color:var(--text)}
+  .notifrow .nls{font-family:var(--mono); font-size:9px; color:var(--faint); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; line-height:1.5}
+  .tgl{flex:0 0 auto; width:46px; height:27px; border-radius:999px; border:1px solid var(--line); background:var(--surface-2); position:relative; transition:background .2s, border-color .2s; cursor:pointer}
+  .tgl::after{content:""; position:absolute; top:2px; left:2px; width:21px; height:21px; border-radius:999px; background:#fff; box-shadow:0 1px 3px rgba(20,20,20,.2); transition:transform .2s}
+  .tgl.on{background:var(--accent); border-color:var(--accent)} .tgl.on::after{transform:translateX(19px)}
+  /* ── retention: stats board (My teams) ── */
+  .statgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:4px 0 12px}
+  .statcell{background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:13px 6px; text-align:center}
+  .statcell b{display:block; font-family:var(--mono); font-size:23px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-0.02em; color:var(--text)}
+  .statcell span{font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted)}
+  .statcell b.accent{color:var(--accent)}
+  .daybreak{background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:14px}
+  .daybreak .dbrow{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 14px}
+  .daybreak .dbrow+.dbrow{border-top:1px solid var(--line)}
+  .daybreak .dbd{font-family:var(--mono); font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+  .daybreak .dbpips{display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end}
+  .pip{width:9px; height:9px; border-radius:3px; background:var(--surface-2); border:1px solid var(--line)}
+  .pip.hit{background:var(--accent); border-color:var(--accent)} .pip.miss{background:var(--live); border-color:var(--live); opacity:.55}
+  .daybreak .dbn{font-family:var(--mono); font-size:10px; color:var(--faint); margin-left:6px; flex:0 0 auto}
+  /* ── retention: badges ── */
+  .badgegrid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:4px 0 14px}
+  .badge{display:flex; align-items:center; gap:11px; background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:12px 13px; transition:border-color .2s, box-shadow .2s}
+  .badge.locked{opacity:.5; filter:grayscale(1)}
+  .badge.unlocked{border-color:color-mix(in srgb, var(--accent) 40%, var(--line))}
+  .badge .bico{font-size:24px; line-height:1; flex:0 0 auto}
+  .badge .bt{font-size:12px; font-weight:700; color:var(--text); letter-spacing:-0.01em}
+  .badge .bs{font-family:var(--mono); font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-top:2px}
+  .badge.justpopped{animation:lockin .5s ease}
+  /* ── retention: bracket / road to the final ── */
+  .bracketwrap{margin-top:6px}
+  .bkround{margin-bottom:18px}
+  .bkround .bkh{font-family:var(--mono); font-size:10px; font-weight:600; color:var(--faint); text-transform:uppercase; letter-spacing:.14em; margin:0 4px 9px; display:flex; justify-content:space-between}
+  .bktie{display:flex; align-items:stretch; background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:9px}
+  .bktie.favpath{border-color:var(--accent); box-shadow:0 2px 12px color-mix(in srgb, var(--accent) 18%, transparent)}
+  .bktie .bkside{flex:1; display:flex; align-items:center; gap:9px; padding:12px 13px; min-width:0}
+  .bktie .bkside+.bkside{border-top:1px solid var(--line)}
+  .bktie .bkcol{display:flex; flex-direction:column; flex:1; min-width:0}
+  .bktie .bknm{font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .bktie .bknm.win{color:var(--accent)} .bktie .bknm.dim{color:var(--faint)}
+  .bktie .bkfav{color:var(--accent)}
+  .bktie .bksc{font-family:var(--mono); font-size:15px; font-weight:700; color:var(--text); flex:0 0 auto}
+  .bkdot{width:18px; height:18px; border-radius:5px; flex:0 0 auto}
+  .bknote{font-family:var(--mono); font-size:10px; color:var(--faint); text-transform:uppercase; letter-spacing:.06em; padding:10px 4px 0; line-height:1.6}
+  /* share button in sheet */
+  .sharebtn{background:var(--accent); color:var(--on); border:none; border-radius:12px; box-shadow:0 2px 12px color-mix(in srgb, var(--accent) 30%, transparent); padding:13px 16px; font-family:var(--mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; width:100%; margin-top:14px; display:flex; align-items:center; justify-content:center; gap:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="row1">
+      <div><div class="t">FIFA World Cup 2026</div><div class="s" id="hdate"></div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex:0 0 auto">
+        <button class="pick press" id="pickBtn" aria-label="Pick or change your team"><span class="pf" id="pickFlag">⚽</span><span id="pickLbl">Pick team</span></button>
+        <button class="sound press" id="soundBtn" aria-label="Toggle sound">🔇</button>
+      </div>
+    </div>
+  </header>
+  <div class="databar sample" id="databar">Loading…</div>
+  <div class="seg" id="seg">
+    <button data-f="live" class="on press">Live</button>
+    <button data-f="upcoming" class="press">Fixtures</button>
+    <button data-f="results" class="press">Results</button>
+  </div>
+  <main>
+    <section id="tab-matches" class="tab on"><div id="mdbannerHost"></div><div id="hero"></div><div id="streakBar"></div><div id="matchList"></div></section>
+    <section id="tab-standings" class="tab"><div id="standList"></div></section>
+    <section id="tab-bracket" class="tab"><div id="bracketList"></div></section>
+    <section id="tab-fav" class="tab"><div id="favList"></div></section>
+  </main>
+  <nav>
+    <button data-tab="matches" class="on press"><span class="ic">⚽</span>Matches</button>
+    <button data-tab="standings" class="press"><span class="ic">▤</span>Standings</button>
+    <button data-tab="bracket" class="press"><span class="ic">⛛</span>Bracket</button>
+    <button data-tab="fav" class="press"><span class="ic">★</span>My teams</button>
+  </nav>
+</div>
+<div class="sheet" id="sheet"><div class="panel" id="sheetBody"></div></div>
+<div class="picker" id="picker">
+  <div class="ptop">
+    <span class="pball">⚽</span>
+    <div class="pk">FIFA World Cup 2026</div>
+    <h1 id="pickHeading">Who do you support?</h1>
+    <p>Tap your team to bring the tournament to life.</p>
+  </div>
+  <div class="pgrid" id="pickGrid"></div>
+  <div class="pskip"><button id="pickSkip">Skip for now</button></div>
+</div>
+<canvas id="fx"></canvas>
+
+<script>
+const $=s=>document.querySelector(s);
+const FLAG={Brazil:'🇧🇷',Croatia:'🇭🇷',Argentina:'🇦🇷',Mexico:'🇲🇽',France:'🇫🇷','United States':'🇺🇸',England:'🏴',Japan:'🇯🇵',Spain:'🇪🇸',Germany:'🇩🇪',Netherlands:'🇳🇱',Morocco:'🇲🇦',Portugal:'🇵🇹',Canada:'🇨🇦'};
+const team=(name,tla,crest)=>({name,tla:tla||'',crest:crest||'',flag:FLAG[name]||'🏳️'});
+
+// ── Feature 1: team color map (primary, secondary) for ~24 likely WC teams ──
+const TEAM_COLORS={
+  Brazil:['#009b3a','#ffdf00'], Argentina:['#6cace4','#ffffff'], France:['#1f3a93','#ef3340'],
+  Spain:['#c60b1e','#ffc400'], Germany:['#111111','#dd0000'], England:['#ce1124','#1c2d6b'],
+  Portugal:['#006600','#d2202e'], Netherlands:['#ff6b00','#21468b'], Croatia:['#c8102e','#0093dd'],
+  Mexico:['#006847','#ce1126'], 'United States':['#3c3b6e','#b22234'], Japan:['#bc002d','#23272f'],
+  Morocco:['#006233','#c1272d'], Canada:['#d52b1e','#2b2b2b'], Belgium:['#111111','#ffd700'],
+  Italy:['#0066b3','#009246'], Uruguay:['#5cbfeb','#0c2340'], Colombia:['#fcd116','#003893'],
+  Switzerland:['#d52b1e','#ffffff'], Denmark:['#c60c30','#ffffff'], Senegal:['#00853f','#fdef42'],
+  Poland:['#dc143c','#ffffff'], 'South Korea':['#003478','#cd2e3a'], Australia:['#00843d','#ffcd00'],
+  Ghana:['#006b3f','#fcd116'], Ecuador:['#ffd100','#0033a0']
+};
+const DEFAULT_COLORS=['#5b62d6','#8b90e8'];
+const colorsFor=n=>TEAM_COLORS[n]||DEFAULT_COLORS;
+// Kickoff of the tournament (first match). Fallback if no fixture is in the data.
+const TOURNEY_START='2026-06-11T16:00:00';
+// readable on-color for a bg
+function onColor(hex){const c=hex.replace('#','');const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);
+  return (0.299*r+0.587*g+0.114*b)>150?'#1a1a1a':'#ffffff';}
+
+function sampleData(){const t=n=>team(n);return {source:'sample',
+  matches:[
+    {id:1,grp:'Group C',home:t('Brazil'),away:t('Croatia'),date:'2026-06-04',ko:'',status:'live',hs:2,as:1,min:67},
+    {id:2,grp:'Group A',home:t('Mexico'),away:t('France'),date:'2026-06-11',ko:'19:00',status:'up'},
+    {id:3,grp:'Group A',home:t('United States'),away:t('Japan'),date:'2026-06-11',ko:'22:00',status:'up'},
+    {id:7,grp:'Group F',home:t('Portugal'),away:t('Canada'),date:'2026-06-02',ko:'',status:'fin',hs:3,as:2}],
+  standings:[{g:'Group A',rows:[['France','🇫🇷',1,1,0,0,'+2',3],['United States','🇺🇸',1,1,0,0,'+1',3],['Mexico','🇲🇽',1,0,0,1,'-1',0],['Japan','🇯🇵',1,0,0,1,'-2',0]]}]};
+}
+
+// Same-origin backend (the Cloudflare Worker proxies /api → football-data.org with the secret key).
+async function api(path){ const r=await fetch('/api'+path); if(!r.ok) throw new Error('API '+r.status); return r.json(); }
+function mapStatus(s){return ['IN_PLAY','PAUSED'].includes(s)?'live':s==='FINISHED'?'fin':'up';}
+async function realData(){
+  const mj=await api('/competitions/WC/matches');
+  const matches=(mj.matches||[]).map(m=>{const ht=m.homeTeam||{},at=m.awayTeam||{},sc=(m.score&&m.score.fullTime)||{};const d=new Date(m.utcDate);
+    return {id:m.id, grp:m.group?m.group.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase()):(m.stage||'').replace('_',' '),
+      home:team(ht.name,ht.tla,ht.crest), away:team(at.name,at.tla,at.crest),
+      date:m.utcDate.slice(0,10), ko:d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}), utc:m.utcDate,
+      status:mapStatus(m.status), hs:sc.home, as:sc.away, min:m.minute||null};});
+  let standings=[];
+  try{const sj=await api('/competitions/WC/standings');
+    standings=(sj.standings||[]).filter(s=>s.type==='TOTAL').map(s=>({g:s.group?s.group.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase()):'Standings',
+      rows:(s.table||[]).map(r=>[r.team.name,FLAG[r.team.name]||'⚪',r.playedGames,r.won,r.draw,r.lost,(r.goalDifference>=0?'+':'')+r.goalDifference,r.points])}));
+  }catch(e){}
+  return {source:'live', matches, standings};
+}
+
+let DATA=sampleData(), filter='live', tab='matches';
+let fav=JSON.parse(localStorage.getItem('wc26_fav')||'[]');
+let themeTeam=localStorage.getItem('wc26_theme')||null;
+let soundOn=localStorage.getItem('wc26_sound')==='1';
+let picks=JSON.parse(localStorage.getItem('wc26_picks')||'{}'); // {matchId: pickedTeamName}
+let notifyOn=localStorage.getItem('wc26_notify')==='1'; // opt-in matchday browser notifications
+let badges=JSON.parse(localStorage.getItem('wc26_badges')||'[]'); // unlocked badge ids
+let notifiedMatches=JSON.parse(sessionStorage.getItem('wc26_notified')||'[]'); // matchIds notified this session (avoid dupes)
+let lastScores={}; // matchId -> "h-a" for goal-delta detection
+const isFav=n=>fav.includes(n);
+function toggleFav(n){
+  const adding=!isFav(n);
+  fav=isFav(n)?fav.filter(x=>x!==n):fav.concat(n);
+  localStorage.setItem('wc26_fav',JSON.stringify(fav));
+  if(adding){ themeTeam=n; }                       // most-recently-favorited drives the theme
+  else if(themeTeam===n){ themeTeam=fav[fav.length-1]||null; }
+  localStorage.setItem('wc26_theme', themeTeam||'');
+  applyTheme(); syncPickBtn(); render();
+}
+$('#hdate').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+
+// ── Feature 1: apply team-color takeover via CSS custom properties ──
+function applyTheme(){
+  const root=document.documentElement;
+  if(themeTeam){
+    // The favorited team's color is the ONE strong accent on the light, warm canvas.
+    // The chrome stays Pageloop-light; only the accent (tabs, hero bar, picks) moves to the team color.
+    const [p]=colorsFor(themeTeam);
+    root.style.setProperty('--accent',p);
+    root.style.setProperty('--on',onColor(p));
+    root.style.setProperty('--gold',p);
+  }else{
+    ['--accent','--on','--gold'].forEach(v=>root.style.removeProperty(v));
+  }
+  // Header chrome is always soft warm off-white regardless of team.
+  document.querySelector('meta[name=theme-color]').setAttribute('content','#FAF9F7');
+}
+function darken(hex,amt){const c=hex.replace('#','');let r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);
+  r=Math.round(r*(1-amt));g=Math.round(g*(1-amt));b=Math.round(b*(1-amt));
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');}
+
+const crest=tm=>tm.crest?`<img class="crest" src="${tm.crest}" alt="">`:`<span class="flag">${tm.flag}</span>`;
+function teamHtml(tm,score){ return `<div class="team">${crest(tm)}<span class="nm">${tm.name||'TBD'}${isFav(tm.name)?' <span class="star">★</span>':''}</span></div>`+(score!==undefined&&score!==null?`<span class="score" data-side data-id>${score}</span>`:''); }
+const fmtDay=d=>new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+
+// ── Feature 3 helper: live score markup gets pulse class ──
+function scoreCell(val,live){ return `<span class="score${live?' livepulse':''}">${val}</span>`; }
+
+// ── Feature 5: prediction block for upcoming + verdict for finished ──
+function predBlock(m){
+  if(m.home.name==='TBD'||m.away.name==='TBD'||!m.home.name||!m.away.name) return '';
+  const pick=picks[m.id];
+  if(m.status==='up'){
+    const chip=(tm)=>`<button class="pchip press${pick===tm.name?' picked':''}" data-pick="${m.id}" data-team="${tm.name}">${crest(tm)} ${tm.tla||tm.name}</button>`;
+    return `<div class="pred"><div class="plabel">Who ya got?</div>
+      <div class="pchoices">${chip(m.home)}${chip(m.away)}</div></div>`;
+  }
+  if(m.status==='fin' && pick && m.hs!=null && m.as!=null){
+    const winner=m.hs>m.as?m.home.name:m.as>m.hs?m.away.name:null;
+    if(winner===null) return `<div class="verdict">— Draw · no call</div>`;
+    const right=pick===winner;
+    return `<div class="verdict ${right?'right':'wrong'}">${right?'✓ CALLED IT':'✗ Missed it'}</div>`;
+  }
+  return '';
+}
+
+function matchCard(m){
+  const live=m.status==='live';
+  const head=live?`<span>${m.grp}</span><span class="live-badge">● LIVE${m.min?' '+m.min+"'":''}</span>`
+    :m.status==='fin'?`<span>${m.grp}</span><span>FT</span>`:`<span>${m.grp}</span><span>${m.ko||fmtDay(m.date)}</span>`;
+  const hScore=m.status==='up'?null:m.hs, aScore=m.status==='up'?null:m.as;
+  const sH=(hScore!==undefined&&hScore!==null)?scoreCell(hScore,live):'';
+  const sA=(aScore!==undefined&&aScore!==null)?scoreCell(aScore,live):'';
+  return `<div class="match" data-id="${m.id}"><div class="grp">${head}</div>
+    <div class="row"><div class="team">${crest(m.home)}<span class="nm">${m.home.name||'TBD'}${isFav(m.home.name)?' <span class="star">★</span>':''}</span></div>${sH}</div>
+    <div class="row"><div class="team">${crest(m.away)}<span class="nm">${m.away.name||'TBD'}${isFav(m.away.name)?' <span class="star">★</span>':''}</span></div>${sA}</div>
+    ${predBlock(m)}</div>`;
+}
+
+// ── Feature 2: My-team hero card + live countdown ──
+let heroTimer=null;
+function nextFavMatch(){
+  if(!themeTeam) return null;
+  const now=Date.now();
+  const up=DATA.matches
+    .filter(m=>(m.home.name===themeTeam||m.away.name===themeTeam))
+    .filter(m=>m.status==='live' || (m.status==='up' && (m.utc?new Date(m.utc).getTime():new Date(m.date+'T'+(m.ko&&/^\d/.test(m.ko)?m.ko:'12:00')).getTime())>=now-3*3600*1000))
+    .sort((a,b)=>{const ta=a.utc?new Date(a.utc).getTime():new Date(a.date).getTime();const tb=b.utc?new Date(b.utc).getTime():new Date(b.date).getTime();return ta-tb;});
+  return up[0]||null;
+}
+function renderHero(){
+  const host=$('#hero');
+  if(heroTimer){clearInterval(heroTimer);heroTimer=null;}
+  if(!themeTeam){ host.innerHTML=''; return; }
+  const tm=(DATA.matches.flatMap(m=>[m.home,m.away]).find(t=>t.name===themeTeam))||team(themeTeam);
+  const [p,s]=colorsFor(themeTeam);
+  const m=nextFavMatch();
+  const opp=m?(m.home.name===themeTeam?m.away:m.home):null;
+  host.innerHTML=`<div class="hero" style="--hero-a:${darken(p,.2)};--hero-b:${p}">
+    <div class="htop">${tm.crest?`<img class="hcrest" src="${tm.crest}" alt="">`:`<span class="hflag">${tm.flag}</span>`}
+      <div><div class="hname">${themeTeam}</div><div class="hsub">Your team</div></div></div>
+    <div id="heroBody"></div></div>`;
+  const body=$('#heroBody');
+  function paint(){
+    if(!m){ body.innerHTML=`<div class="hvs" style="margin-top:14px">No upcoming fixture scheduled.</div>`; return; }
+    const ko=m.utc?new Date(m.utc).getTime():new Date(m.date+'T'+(m.ko&&/^\d/.test(m.ko)?m.ko:'12:00')).getTime();
+    const diff=ko-Date.now();
+    const vs=`vs ${opp?opp.name:'TBD'}`;
+    if(m.status==='live'){ body.innerHTML=`<div class="matchday">● LIVE NOW</div><div class="hvs">${vs}${m.hs!=null?` · ${m.hs}–${m.as}`:''}</div>`; return; }
+    if(diff<=24*3600*1000){
+      body.innerHTML=`<div class="matchday">⚡ MATCHDAY</div><div class="hvs">${vs} · kickoff ${m.ko||fmtDay(m.date)}</div>`; return;
+    }
+    const d=Math.floor(diff/86400000), h=Math.floor(diff/3600000)%24, mn=Math.floor(diff/60000)%60, sc=Math.floor(diff/1000)%60;
+    const seg=(v,l)=>`<div class="seg-t"><b>${String(v).padStart(2,'0')}</b><span>${l}</span></div>`;
+    body.innerHTML=`<div class="hvs" style="margin-top:12px">${vs}</div>
+      <div class="hcd">${seg(d,'days')}${seg(h,'hrs')}${seg(mn,'min')}${seg(sc,'sec')}</div>`;
+  }
+  paint();
+  heroTimer=setInterval(paint,1000);
+}
+
+// ── Feature 5: streak bar ──
+function renderStreak(){
+  const fins=DATA.matches.filter(m=>m.status==='fin'&&picks[m.id]&&m.hs!=null&&m.as!=null)
+    .filter(m=>{const w=m.hs>m.as?m.home.name:m.as>m.hs?m.away.name:null; return w!==null;})
+    .sort((a,b)=>{const ta=a.utc?new Date(a.utc):new Date(a.date);const tb=b.utc?new Date(b.utc):new Date(b.date);return tb-ta;}); // newest first
+  let streak=0;
+  for(const m of fins){ const w=m.hs>m.as?m.home.name:m.away.name; if(picks[m.id]===w) streak++; else break; }
+  const total=fins.length, hits=fins.filter(m=>{const w=m.hs>m.as?m.home.name:m.away.name;return picks[m.id]===w;}).length;
+  $('#streakBar').innerHTML = total? `<div style="margin:4px 0 2px">${streak>=1?`<span class="streak">🔥 ${streak} in a row</span>`:''}<span class="streak">${hits}/${total} called</span></div>`:'';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  RETENTION FEATURES (all client-side; localStorage-backed)
+//  NOTE: a real multi-user leaderboard needs a backend (e.g. Cloudflare
+//  KV). We do NOT fake other users. See LEADERBOARD_HOOK below for the
+//  future server-side integration point.
+// ════════════════════════════════════════════════════════════════
+
+// Shared: graded finished picks, newest-first, with hit + day info.
+function gradedPicks(){
+  return DATA.matches
+    .filter(m=>m.status==='fin'&&picks[m.id]&&m.hs!=null&&m.as!=null)
+    .map(m=>{ const w=m.hs>m.as?m.home.name:m.as>m.hs?m.away.name:null; return {m,winner:w,decided:w!==null,hit:w!==null&&picks[m.id]===w}; })
+    .filter(x=>x.decided)
+    .sort((a,b)=>{const ta=a.m.utc?new Date(a.m.utc):new Date(a.m.date);const tb=b.m.utc?new Date(b.m.utc):new Date(b.m.date);return tb-ta;});
+}
+// Best streak ever (scan oldest→newest), plus current (newest run).
+function streakStats(g){
+  const chrono=[...g].reverse(); // oldest first
+  let best=0,run=0; chrono.forEach(x=>{ run=x.hit?run+1:0; if(run>best)best=run; });
+  let cur=0; for(const x of g){ if(x.hit)cur++; else break; }
+  return {best,cur};
+}
+
+// ── Stats board (My teams tab) ──
+function renderStats(){
+  const g=gradedPicks();
+  const total=g.length, correct=g.filter(x=>x.hit).length;
+  const acc=total?Math.round(correct/total*100):0;
+  const {best,cur}=streakStats(g);
+  // per-day breakdown
+  const byDay={};
+  g.forEach(x=>{ (byDay[x.m.date]=byDay[x.m.date]||[]).push(x); });
+  const days=Object.keys(byDay).sort((a,b)=>a<b?1:-1);
+  const board=`<div class="sech">My record</div>
+    <div class="statgrid">
+      <div class="statcell"><b>${total}</b><span>Picks</span></div>
+      <div class="statcell"><b class="accent">${correct}</b><span>Correct</span></div>
+      <div class="statcell"><b>${acc}%</b><span>Accuracy</span></div>
+      <div class="statcell"><b class="accent">${cur}</b><span>Streak</span></div>
+      <div class="statcell"><b>${best}</b><span>Best</span></div>
+      <div class="statcell"><b>${days.length}</b><span>Game days</span></div>
+    </div>`;
+  const breakdown = days.length ? `<div class="daybreak">${days.map(d=>{
+      const xs=byDay[d], h=xs.filter(x=>x.hit).length;
+      const pips=xs.map(x=>`<span class="pip ${x.hit?'hit':'miss'}"></span>`).join('');
+      return `<div class="dbrow"><span class="dbd">${fmtDay(d)}</span><span style="display:flex;align-items:center"><span class="dbpips">${pips}</span><span class="dbn">${h}/${xs.length}</span></span></div>`;
+    }).join('')}</div>` : '';
+  const empty = total ? '' : `<p class="empty" style="text-align:left;padding:10px 4px 14px">No graded picks yet. Make a call on the Matches tab — it becomes a daily game once results land.</p>`;
+  // LEADERBOARD_HOOK: to add a global leaderboard, POST {device, total, correct,
+  // streak:best} to a Cloudflare Worker backed by KV here, then render the top N
+  // returned scores below. Requires a backend; not faked client-side.
+  return board+breakdown+empty;
+}
+
+// ── Badges & milestones ──
+const BADGE_DEFS=[
+  {id:'first',  ico:'🎟️', t:'First pick',       s:'Make your first call'},
+  {id:'s3',     ico:'🔥', t:'3-streak',          s:'3 correct in a row'},
+  {id:'s5',     ico:'⚡', t:'5-streak',          s:'5 correct in a row'},
+  {id:'upset',  ico:'🧨', t:'Called an upset',   s:'Pick the lower seed & win'},
+  {id:'perfect',ico:'🎯', t:'Perfect group day', s:'All picks right in a day'},
+  {id:'sharp',  ico:'🎓', t:'Sharp eye',         s:'Reach 75% over 8+ picks'}
+];
+// standings rank lookup (lower number = stronger). Missing teams treated equal.
+function standingsRank(name){
+  for(const grp of DATA.standings){ const i=grp.rows.findIndex(r=>r[0]===name); if(i>=0) return i; }
+  return null;
+}
+function computeBadges(){
+  const g=gradedPicks();
+  const earned=new Set();
+  if(Object.keys(picks).length) earned.add('first');
+  const {best}=streakStats(g);
+  if(best>=3) earned.add('s3');
+  if(best>=5) earned.add('s5');
+  // upset: picked the lower-standings team (higher rank index) and they won
+  for(const x of g){ if(!x.hit) continue; const m=x.m;
+    const ra=standingsRank(m.home.name), rb=standingsRank(m.away.name);
+    if(ra==null||rb==null) continue;
+    const winnerRank=x.winner===m.home.name?ra:rb, loserRank=x.winner===m.home.name?rb:ra;
+    if(winnerRank>loserRank) earned.add('upset'); // winner was lower in the table
+  }
+  // perfect group day: any day with >=2 picks, all correct
+  const byDay={}; g.forEach(x=>{ (byDay[x.m.date]=byDay[x.m.date]||[]).push(x); });
+  Object.values(byDay).forEach(xs=>{ if(xs.length>=2 && xs.every(x=>x.hit)) earned.add('perfect'); });
+  // sharp eye
+  if(g.length>=8 && g.filter(x=>x.hit).length/g.length>=0.75) earned.add('sharp');
+  return earned;
+}
+let badgeFreshPop=null;
+function syncBadges(){
+  const earned=computeBadges();
+  const newly=[...earned].filter(id=>!badges.includes(id));
+  if(newly.length){
+    badges=[...new Set([...badges,...earned])];
+    localStorage.setItem('wc26_badges',JSON.stringify(badges));
+    badgeFreshPop=newly[0];
+    if(navigator.vibrate) navigator.vibrate([20,40,20]);
+  }
+  return earned;
+}
+function renderBadges(){
+  const earned=computeBadges();
+  // ensure persisted set kept in sync (covers loads where syncBadges ran elsewhere)
+  const cards=BADGE_DEFS.map(b=>{ const on=earned.has(b.id);
+    return `<div class="badge ${on?'unlocked':'locked'}${on&&badgeFreshPop===b.id?' justpopped':''}"><span class="bico">${b.ico}</span><div><div class="bt">${b.t}</div><div class="bs">${on?'Unlocked':b.s}</div></div></div>`;
+  }).join('');
+  badgeFreshPop=null;
+  const n=earned.size;
+  return `<div class="sech">Badges <span style="color:var(--faint)">${n}/${BADGE_DEFS.length}</span></div><div class="badgegrid">${cards}</div>`;
+}
+
+// ── Matchday alert banner + browser notifications ──
+function isSameDay(d, ref){ return d===ref; } // dates are 'YYYY-MM-DD'
+function todaysFavMatches(){
+  if(!fav.length) return [];
+  const today=new Date(); const ymd=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  return DATA.matches.filter(m=>(fav.includes(m.home.name)||fav.includes(m.away.name)) && (m.date===ymd) && (m.status==='up'||m.status==='live'));
+}
+function renderMatchdayBanner(){
+  const host=$('#mdbannerHost'); if(!host) return;
+  const list=todaysFavMatches();
+  if(!list.length){ host.innerHTML=''; return; }
+  host.innerHTML=list.slice(0,2).map(m=>{
+    const me=fav.includes(m.home.name)?m.home:fav.includes(m.away.name)?m.away:m.home;
+    const opp=me.name===m.home.name?m.away:m.home;
+    const when=m.status==='live'?'● Live now':(m.ko||'Today');
+    return `<div class="mdbanner" data-id="${m.id}"><span class="mdico">⚽</span><div class="mdtxt"><div class="mdt">Matchday — ${me.name} vs ${opp.name}</div><div class="mds">${m.grp} · ${when}</div></div></div>`;
+  }).join('');
+}
+function renderNotifyRow(){
+  if(typeof Notification==='undefined') return ''; // not supported
+  const denied=Notification.permission==='denied';
+  return `<div class="notifrow"><div class="nl"><div class="nlt">Notify me on matchdays</div>
+    <div class="nls">${denied?'Blocked in browser settings.':'Fires only while this site is open — no server push yet.'}</div></div>
+    <button class="tgl ${notifyOn?'on':''} press" data-notify aria-label="Toggle matchday notifications" ${denied?'disabled style="opacity:.4"':''}></button></div>`;
+}
+function fireMatchdayNotifications(){
+  if(!notifyOn || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+  todaysFavMatches().forEach(m=>{
+    if(notifiedMatches.includes(m.id)) return;
+    const me=fav.includes(m.home.name)?m.home:m.away;
+    const opp=me.name===m.home.name?m.away:m.home;
+    try{
+      new Notification('⚽ Matchday — World Cup 2026',{ body:`${me.name} vs ${opp.name} · ${m.status==='live'?'Live now':(m.ko||'Today')}`, tag:'wc26-'+m.id });
+      notifiedMatches.push(m.id); sessionStorage.setItem('wc26_notified',JSON.stringify(notifiedMatches));
+    }catch(e){}
+  });
+}
+async function toggleNotify(){
+  if(typeof Notification==='undefined') return;
+  if(!notifyOn){
+    let perm=Notification.permission;
+    if(perm==='default'){ try{ perm=await Notification.requestPermission(); }catch(e){ perm=Notification.permission; } }
+    if(perm!=='granted'){ notifyOn=false; localStorage.setItem('wc26_notify','0'); renderFav(); return; }
+    notifyOn=true; localStorage.setItem('wc26_notify','1');
+    fireMatchdayNotifications();
+  } else {
+    notifyOn=false; localStorage.setItem('wc26_notify','0');
+  }
+  renderFav();
+}
+
+// ── Live bracket / Road to the Final ──
+// Knockout-stage detection: football-data marks stage; we look for non-group fixtures.
+const KO_STAGES=[
+  {key:'LAST_32', label:'Round of 32', m:['round of 32','last 32']},
+  {key:'LAST_16', label:'Round of 16', m:['round of 16','last 16']},
+  {key:'QF',      label:'Quarter-finals', m:['quarter']},
+  {key:'SF',      label:'Semi-finals', m:['semi']},
+  {key:'3RD',     label:'Third place', m:['third','3rd']},
+  {key:'FINAL',   label:'Final', m:['final']}
+];
+function stageOf(m){
+  const g=(m.grp||'').toLowerCase();
+  if(g.includes('group')) return null;
+  for(const s of KO_STAGES){ if(s.m.some(t=>g.includes(t)) && !(s.key==='FINAL'&&(g.includes('semi')||g.includes('quarter')||g.includes('third')))) return s; }
+  // generic non-group fixture with no clear stage label
+  if(g) return {key:'KO',label:m.grp,m:[]};
+  return null;
+}
+function knockoutMatches(){ return DATA.matches.filter(m=>stageOf(m)); }
+function bktSide(tm, winner, favSide){
+  const isFavTeam=isFav(tm.name);
+  const cls=winner==null?'':winner===tm.name?'win':'dim';
+  const dot=tm.crest?`<img class="crest" style="width:18px;height:18px" src="${tm.crest}" alt="">`:`<span class="bkdot" style="background:${colorsFor(tm.name)[0]}"></span>`;
+  return `<div class="bkside">${dot}<div class="bkcol"><span class="bknm ${cls}">${tm.name||'TBD'}${isFavTeam?' <span class="bkfav">★</span>':''}</span></div></div>`;
+}
+function renderBracket(){
+  const host=$('#bracketList');
+  const ko=knockoutMatches();
+  if(ko.length){
+    // group by stage, in canonical order
+    const order=KO_STAGES.map(s=>s.label).concat(['Knockout']);
+    const groups={};
+    ko.forEach(m=>{ const st=stageOf(m); const lbl=st.label||'Knockout'; (groups[lbl]=groups[lbl]||[]).push(m); });
+    const labels=Object.keys(groups).sort((a,b)=>{
+      const ia=order.indexOf(a), ib=order.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib);
+    });
+    host.innerHTML=`<div class="sech" style="margin-top:14px">Road to the Final</div><div class="bracketwrap">`+
+      labels.map(lbl=>{
+        const ties=groups[lbl].map(m=>{
+          const winner=(m.status==='fin'&&m.hs!=null&&m.as!=null)?(m.hs>m.as?m.home.name:m.as>m.hs?m.away.name:null):null;
+          const favIn=isFav(m.home.name)||isFav(m.away.name);
+          const sc=(m.hs!=null&&m.as!=null)?`<span class="bksc">${m.hs}</span>`:'';
+          const sc2=(m.hs!=null&&m.as!=null)?`<span class="bksc">${m.as}</span>`:'';
+          return `<div class="bktie ${favIn?'favpath':''}" data-id="${m.id}">
+            <div style="display:flex;align-items:center;width:100%"><div style="flex:1">${bktSide(m.home,winner)}${bktSide(m.away,winner)}</div>
+            <div style="display:flex;flex-direction:column;justify-content:space-around;padding:0 14px;gap:14px">${sc}${sc2}</div></div></div>`;
+        }).join('');
+        return `<div class="bkround"><div class="bkh"><span>${lbl}</span><span>${groups[lbl].length} tie${groups[lbl].length>1?'s':''}</span></div>${ties}</div>`;
+      }).join('')+
+      `<p class="bknote">★ marks your team's path. Winners advance automatically as results land.</p></div>`;
+    return;
+  }
+  // No knockout fixtures yet → seed a clean "Road to the Final" placeholder from groups.
+  const groups=DATA.standings.length?DATA.standings:[];
+  const seeded = groups.length ? groups.map(g=>{
+    const top2=g.rows.slice(0,2).map(r=>r[0]);
+    return {g:g.g, teams:top2};
+  }) : [];
+  const favSeedHtml = seeded.length ? `<div class="bkround"><div class="bkh"><span>Projected qualifiers</span><span>top 2 / group</span></div>`+
+    seeded.map(s=>{
+      const favIn=s.teams.some(t=>isFav(t));
+      const rows=s.teams.map(n=>{
+        const tm=teamObjFor(n);
+        const dot=tm.crest?`<img class="crest" style="width:18px;height:18px" src="${tm.crest}" alt="">`:`<span class="bkdot" style="background:${colorsFor(n)[0]}"></span>`;
+        return `<div class="bkside">${dot}<div class="bkcol"><span class="bknm">${n}${isFav(n)?' <span class="bkfav">★</span>':''}</span></div></div>`;
+      }).join('')||`<div class="bkside"><span class="bknm dim">TBD</span></div>`;
+      return `<div class="bktie ${favIn?'favpath':''}"><div style="flex:1"><div class="bkside" style="padding-bottom:4px"><span class="bknm dim" style="font-family:var(--mono);font-size:10px;letter-spacing:.1em">${s.g.toUpperCase()}</span></div>${rows}</div></div>`;
+    }).join('')+`</div>` : '';
+  host.innerHTML=`<div class="sech" style="margin-top:14px">Road to the Final</div>
+    <div class="bracketwrap">
+      <div class="tourney" style="text-align:left;margin:6px 0 14px"><span class="tball">⛛</span>
+        <div class="tk">Bracket</div>
+        <div class="tt" style="margin-top:8px">The knockouts aren't drawn yet</div>
+        <div class="ts">We'll fill in Round of 32 → Final automatically once the knockout fixtures land. ${seeded.length?'Below are the projected qualifiers from current group standings.':'Pick your team and follow the group stage in the meantime.'}</div>
+      </div>
+      ${favSeedHtml}
+      ${seeded.length?`<p class="bknote">★ marks your team. Projection from current standings — updates as group results change.</p>`:''}
+    </div>`;
+}
+
+// ── First-run "Pick your team" picker ──
+function pickerTeams(){
+  // Prefer the teams actually in the data; fall back to TEAM_COLORS.
+  const fromData=[...new Set(DATA.matches.flatMap(m=>[m.home.name,m.away.name]))].filter(n=>n&&n!=='TBD');
+  const known=Object.keys(TEAM_COLORS);
+  const set=new Set([...fromData.filter(n=>FLAG[n]||TEAM_COLORS[n]), ...known]);
+  return [...set].sort();
+}
+function teamObjFor(name){
+  return (DATA.matches.flatMap(m=>[m.home,m.away]).find(t=>t.name===name))||team(name);
+}
+function renderPicker(){
+  const grid=$('#pickGrid');
+  grid.innerHTML=pickerTeams().map(n=>{
+    const tm=teamObjFor(n); const [p,s]=colorsFor(n);
+    const badge=tm.crest?`<img class="crest" style="width:34px;height:34px;display:block;margin:0 auto" src="${tm.crest}" alt="">`:`<span class="pflag">${tm.flag}</span>`;
+    return `<button class="pcard" data-pickteam="${n}">${badge}<div class="pn">${n}</div><div class="pdot" style="background:linear-gradient(90deg,${p},${s})"></div></button>`;
+  }).join('');
+}
+function openPicker(){ $('#pickHeading').textContent = fav.length?'Switch your team':'Who do you support?'; renderPicker(); $('#picker').classList.add('on'); }
+function closePicker(){ $('#picker').classList.remove('on'); }
+function syncPickBtn(){
+  if(themeTeam){ $('#pickFlag').textContent=(FLAG[themeTeam]||'⚽'); $('#pickLbl').textContent='My team'; }
+  else { $('#pickFlag').textContent='⚽'; $('#pickLbl').textContent='Pick team'; }
+}
+
+// ── Pre-tournament / empty-live hero: big "World Cup starts in …" countdown ──
+let tourneyTimer=null;
+function tourneyStartMs(){
+  // earliest upcoming/live fixture, else the hard-coded kickoff
+  const ts=DATA.matches.map(m=>m.utc?new Date(m.utc).getTime():new Date(m.date+'T'+(m.ko&&/^\d/.test(m.ko)?m.ko:'12:00')).getTime()).filter(x=>!isNaN(x));
+  const future=ts.filter(x=>x>=Date.now()).sort((a,b)=>a-b);
+  return future.length?future[0]:new Date(TOURNEY_START).getTime();
+}
+function renderTourneyHero(host){
+  if(tourneyTimer){clearInterval(tourneyTimer);tourneyTimer=null;}
+  const start=tourneyStartMs();
+  function paint(){
+    const diff=start-Date.now();
+    if(diff<=0){
+      host.innerHTML=`<div class="tourney live-on"><span class="tball">⚽</span>
+        <div class="tk">It's on</div><div class="tt">The World Cup is underway</div>
+        <div class="ts">Check Fixtures and Results for the latest.</div>
+        <button class="tcta" data-goto="upcoming">See fixtures →</button></div>`;
+      if(tourneyTimer){clearInterval(tourneyTimer);tourneyTimer=null;} return;
+    }
+    const d=Math.floor(diff/86400000), h=Math.floor(diff/3600000)%24, mn=Math.floor(diff/60000)%60, sc=Math.floor(diff/1000)%60;
+    const seg=(v,l)=>`<div class="seg-t"><b>${String(v).padStart(2,'0')}</b><span>${l}</span></div>`;
+    host.innerHTML=`<div class="tourney"><span class="tball">⚽</span>
+      <div class="tk">Kickoff countdown</div>
+      <div class="tt">FIFA World Cup 2026 starts in</div>
+      <div class="tcd">${seg(d,'days')}${seg(h,'hrs')}${seg(mn,'min')}${seg(sc,'sec')}</div>
+      <div class="ts">${themeTeam?`You're backing ${themeTeam} — see their countdown above.`:'Pick your team to make it personal.'}</div>
+      <button class="tcta" data-goto="upcoming">${themeTeam?'Predict upcoming matches →':'Pick upcoming winners →'}</button></div>`;
+  }
+  paint(); tourneyTimer=setInterval(paint,1000);
+}
+
+function renderMatches(){
+  renderHero(); renderStreak(); renderMatchdayBanner();
+  let list=DATA.matches.filter(m=>filter==='live'?m.status==='live':filter==='upcoming'?m.status==='up':m.status==='fin');
+  if(!list.length){
+    // Never a dead end: on Live (and upcoming when truly empty) show the big countdown hero.
+    if(filter==='live'||filter==='upcoming'){ renderTourneyHero($('#matchList')); return; }
+    $('#matchList').innerHTML=`<div class="empty">No results yet.</div>`; return;
+  }
+  if(tourneyTimer){clearInterval(tourneyTimer);tourneyTimer=null;}
+  if(filter!=='live'){ const days=[...new Set(list.map(m=>m.date))].sort(filter==='results'?(a,b)=>a<b?1:-1:undefined);
+    $('#matchList').innerHTML=days.map(d=>`<div class="day">${fmtDay(d)}</div>`+list.filter(m=>m.date===d).map(matchCard).join('')).join('');
+  } else $('#matchList').innerHTML=list.map(matchCard).join('');
+}
+function renderStand(){
+  if(!DATA.standings.length){ $('#standList').innerHTML=`<div class="empty">No standings yet.</div>`; return; }
+  $('#standList').innerHTML=DATA.standings.map(s=>`<div class="standtbl"><h4>${s.g}</h4>
+    <table><tr><th class="tn">Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
+    ${s.rows.map((r,i)=>`<tr><td class="tn">${r[1]} ${r[0]}${i<2?' <span class="q">●</span>':''}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td><b>${r[7]}</b></td></tr>`).join('')}
+    </table></div>`).join('')+`<p class="empty" style="padding:6px">● = qualifying (top 2)</p>`;
+}
+function renderFav(){
+  if(!fav.length){ $('#favList').innerHTML=`<div class="empty" style="padding:32px 16px">No teams yet.<br><br><button class="tcta" data-pickopen style="background:var(--accent);color:var(--on);border:none;border-radius:999px;padding:11px 22px;font-size:14px;font-weight:800">Pick your team →</button></div>`; return; }
+  const chips=fav.map(n=>`<span style="display:inline-flex;align-items:center;gap:6px;background:${n===themeTeam?'color-mix(in srgb, var(--accent) 18%, var(--surface-2))':'var(--surface-2)'};border:1px solid ${n===themeTeam?'var(--accent)':'var(--line)'};border-radius:999px;padding:6px 12px;margin:0 6px 8px 0">${FLAG[n]||'⚪'} ${n}${n===themeTeam?' <span class="star">★</span>':''} <button data-unfav="${n}" style="background:none;border:none;color:var(--muted);font-size:15px">×</button></span>`).join('');
+  const mine=DATA.matches.filter(m=>fav.includes(m.home.name)||fav.includes(m.away.name));
+  $('#favList').innerHTML=`<div style="margin:10px 4px">${chips}</div>`
+    + renderStats()
+    + renderBadges()
+    + renderNotifyRow()
+    + `<div class="sech">Your matches</div>`
+    + (mine.length?mine.map(matchCard).join(''):`<div class="empty">No matches for your teams yet.</div>`);
+}
+function render(){ renderMatches(); renderStand(); renderBracket(); renderFav(); }
+
+function openMatch(id){
+  const m=DATA.matches.find(x=>String(x.id)===String(id)); if(!m) return;
+  $('#sheetBody').innerHTML=`<button class="x press" data-close>×</button>
+    <div class="mh"><div class="meta">${m.grp} · ${m.status==='live'?'LIVE'+(m.min?' '+m.min+"'":''):m.status==='fin'?'Full time':fmtDay(m.date)+' · '+m.ko}</div>
+    <div class="big">${crest(m.home)} ${m.status==='up'?'v':m.hs+' – '+m.as} ${crest(m.away)}</div>
+    <div class="meta">${m.home.name} v ${m.away.name}</div></div>
+    <div class="sech">Follow</div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn press" data-fav="${m.home.name}" style="flex:1">${isFav(m.home.name)?'★ ':'☆ '}${m.home.name}</button>
+      <button class="btn press" data-fav="${m.away.name}" style="flex:1">${isFav(m.away.name)?'★ ':'☆ '}${m.away.name}</button></div>
+    <button class="sharebtn press" data-share="${m.id}">↗ Share match card</button>
+    <p class="empty" style="text-align:left;padding:14px 4px 0">Goal/card/lineup detail needs the API-Football upgrade (v1.1) — football-data.org's free tier doesn't include it.</p>`;
+  $('#sheet').classList.add('on');
+}
+
+// ── Feature 5 (retention): shareable match card → <canvas> → navigator.share / download ──
+function loadImg(src){ return new Promise(res=>{ if(!src){res(null);return;} const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; }); }
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+async function buildShareCard(m){
+  const W=1080,H=1080,S=2; // square, retina-ish
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const c=cv.getContext('2d');
+  // background — warm off-white Pageloop canvas
+  c.fillStyle='#FAF9F7'; c.fillRect(0,0,W,H);
+  // card
+  const pad=80, cardX=pad, cardY=pad, cardW=W-pad*2, cardH=H-pad*2;
+  c.save(); c.shadowColor='rgba(20,20,20,0.10)'; c.shadowBlur=40; c.shadowOffsetY=18;
+  c.fillStyle='#FFFFFF'; roundRect(c,cardX,cardY,cardW,cardH,48); c.fill(); c.restore();
+  c.strokeStyle='rgba(0,0,0,0.06)'; c.lineWidth=2; roundRect(c,cardX,cardY,cardW,cardH,48); c.stroke();
+  // accent top bar
+  const acc=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#5b62d6';
+  c.fillStyle=acc; roundRect(c,cardX,cardY,cardW,12,6); c.fill();
+  const cx=W/2;
+  // wordmark
+  c.textAlign='center'; c.fillStyle=acc;
+  c.font='600 30px "Roboto Mono",monospace'; c.fillText('● FIFA WORLD CUP 2026', cx, cardY+90);
+  // group + date
+  c.fillStyle='#6b6862'; c.font='500 26px "Roboto Mono",monospace';
+  const meta=`${(m.grp||'').toUpperCase()} · ${fmtDay(m.date).toUpperCase()}`;
+  c.fillText(meta, cx, cardY+140);
+  // teams
+  const [himg,aimg]=await Promise.all([loadImg(m.home.crest),loadImg(m.away.crest)]);
+  const badge=(img,name,bx)=>{
+    const by=cardY+260, sz=150;
+    if(img){ c.drawImage(img, bx-sz/2, by, sz, sz); }
+    else { c.fillStyle=colorsFor(name)[0]; roundRect(c,bx-sz/2,by,sz,sz,32); c.fill();
+      c.fillStyle='#fff'; c.font='700 64px "Inter",sans-serif'; c.textAlign='center'; c.fillText((name||'?').slice(0,3).toUpperCase(), bx, by+sz/2+22); }
+    c.fillStyle='#1a1a1a'; c.font='700 38px "Inter",sans-serif'; c.textAlign='center';
+    const nm=name||'TBD'; const disp=nm.length>14?nm.slice(0,13)+'…':nm;
+    c.fillText(disp, bx, by+sz+58);
+  };
+  badge(himg, m.home.name, cardX+cardW*0.27);
+  badge(aimg, m.away.name, cardX+cardW*0.73);
+  // center: score or "v" + kickoff
+  c.textAlign='center';
+  if(m.status!=='up' && m.hs!=null && m.as!=null){
+    c.fillStyle='#1a1a1a'; c.font='700 110px "Roboto Mono",monospace'; c.fillText(`${m.hs}–${m.as}`, cx, cardY+400);
+    c.fillStyle=m.status==='live'?'#e23b3b':'#6b6862'; c.font='600 30px "Roboto Mono",monospace';
+    c.fillText(m.status==='live'?'● LIVE':'FULL TIME', cx, cardY+460);
+  } else {
+    c.fillStyle='#9a968f'; c.font='700 84px "Roboto Mono",monospace'; c.fillText('v', cx, cardY+390);
+    c.fillStyle='#1a1a1a'; c.font='700 48px "Roboto Mono",monospace'; c.fillText(m.ko||'TBD', cx, cardY+460);
+    c.fillStyle='#6b6862'; c.font='500 28px "Roboto Mono",monospace'; c.fillText('KICKOFF', cx, cardY+500);
+  }
+  // footer
+  c.fillStyle='#9a968f'; c.font='500 24px "Roboto Mono",monospace';
+  c.fillText('WHO YA GOT?', cx, cardY+cardH-60);
+  return cv;
+}
+async function shareMatch(id){
+  const m=DATA.matches.find(x=>String(x.id)===String(id)); if(!m) return;
+  const btn=document.querySelector(`[data-share="${id}"]`);
+  if(btn){ btn.disabled=true; btn.textContent='Rendering…'; }
+  try{
+    // wait for webfonts so the canvas text matches the app
+    if(document.fonts&&document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+    const cv=await buildShareCard(m);
+    const blob=await new Promise(res=>cv.toBlob(res,'image/png'));
+    const fname=`wc26-${(m.home.tla||m.home.name||'home')}-${(m.away.tla||m.away.name||'away')}.png`.replace(/\s+/g,'');
+    const file=new File([blob],fname,{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({ files:[file], title:'World Cup 2026', text:`${m.home.name} vs ${m.away.name} — World Cup 2026` });
+    } else {
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(url),4000);
+    }
+  }catch(e){ /* user cancelled share or unsupported — no-op */ }
+  finally{ if(btn){ btn.disabled=false; btn.textContent='↗ Share match card'; } }
+}
+
+// ── Features 3+4: detect score changes; flash card, roll digit, confetti + haptics + sound for favs ──
+function snapshotScores(){ const s={}; DATA.matches.forEach(m=>{ if(m.hs!=null&&m.as!=null) s[m.id]=m.hs+'-'+m.as; }); return s; }
+function detectGoals(prev){
+  DATA.matches.forEach(m=>{
+    if(m.status!=='live'||m.hs==null||m.as==null) return;
+    const key=m.id, now=m.hs+'-'+m.as, was=prev[key];
+    if(was!==undefined && was!==now){
+      const [ph,pa]=was.split('-').map(Number);
+      const homeScored=m.hs>ph, awayScored=m.as>pa;
+      const favScored=(homeScored&&isFav(m.home.name))||(awayScored&&isFav(m.away.name));
+      flashMatch(m.id, favScored);
+      if(favScored){
+        const scorer=homeScored&&isFav(m.home.name)?m.home.name:m.away.name;
+        celebrate(scorer);
+      }
+    }
+  });
+}
+function flashMatch(id, fav){
+  if(tab!=='matches'||filter!=='live') return;
+  const el=document.querySelector(`.match[data-id="${id}"]`); if(!el) return;
+  el.classList.add(fav?'flash-fav':'flash');
+  el.querySelectorAll('.score').forEach(s=>{ s.classList.remove('rolled'); void s.offsetWidth; s.classList.add('rolled'); });
+  setTimeout(()=>el.classList.remove('flash','flash-fav'),950);
+}
+
+// ── Feature 4: confetti on <canvas>, haptics, optional crowd roar ──
+const fx=$('#fx'); let fxCtx=fx.getContext('2d'), parts=[], rafId=null;
+function sizeFx(){ fx.width=innerWidth; fx.height=innerHeight; }
+addEventListener('resize',sizeFx); sizeFx();
+function celebrate(teamName){
+  const [p,s]=colorsFor(teamName);
+  burst([p,s,'#ffffff']);
+  if(navigator.vibrate) navigator.vibrate([40,40,80,40,120]);
+  if(soundOn) roar();
+}
+function burst(cols){
+  fx.classList.add('on');
+  for(let i=0;i<90;i++){
+    parts.push({ x:innerWidth/2+(Math.random()-.5)*120, y:innerHeight*0.32,
+      vx:(Math.random()-.5)*9, vy:Math.random()*-11-4, g:0.32+Math.random()*0.12,
+      s:5+Math.random()*6, rot:Math.random()*6.28, vr:(Math.random()-.5)*0.4,
+      c:cols[i%cols.length], life:90+Math.random()*40 });
+  }
+  if(!rafId) tickFx();
+}
+function tickFx(){
+  fxCtx.clearRect(0,0,fx.width,fx.height);
+  parts=parts.filter(p=>p.life>0&&p.y<innerHeight+40);
+  parts.forEach(p=>{
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life--;
+    fxCtx.save(); fxCtx.translate(p.x,p.y); fxCtx.rotate(p.rot);
+    fxCtx.fillStyle=p.c; fxCtx.globalAlpha=Math.max(0,Math.min(1,p.life/40));
+    fxCtx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); fxCtx.restore();
+  });
+  if(parts.length){ rafId=requestAnimationFrame(tickFx); }
+  else { rafId=null; fx.classList.remove('on'); fxCtx.clearRect(0,0,fx.width,fx.height); }
+}
+// short synthesized crowd-roar via Web Audio (no external assets)
+let actx=null;
+function roar(){
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const dur=1.4, sr=actx.sampleRate, buf=actx.createBuffer(1,sr*dur,sr), d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++){ const t=i/d.length; const env=Math.sin(Math.PI*t); d[i]=(Math.random()*2-1)*env*0.5; }
+    const src=actx.createBufferSource(); src.buffer=buf;
+    const bp=actx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=700; bp.Q.value=0.7;
+    const g=actx.createGain(); g.gain.value=0.6;
+    src.connect(bp).connect(g).connect(actx.destination); src.start();
+  }catch(e){}
+}
+
+// sound toggle
+function syncSoundBtn(){ $('#soundBtn').textContent=soundOn?'🔊':'🔇'; }
+syncSoundBtn();
+
+document.addEventListener('click',e=>{
+  // first-run / change-team picker
+  const pb=e.target.closest('#pickBtn'); if(pb){ openPicker(); return; }
+  const po=e.target.closest('[data-pickopen]'); if(po){ openPicker(); return; }
+  const ps=e.target.closest('#pickSkip'); if(ps){ closePicker(); return; }
+  const pt=e.target.closest('[data-pickteam]'); if(pt){
+    const n=pt.dataset.pickteam;
+    if(!isFav(n)) toggleFav(n);   // favorites + sets theme + applyTheme + render
+    else { themeTeam=n; localStorage.setItem('wc26_theme',n); applyTheme(); render(); }
+    syncPickBtn(); if(navigator.vibrate) navigator.vibrate(20);
+    closePicker(); return;
+  }
+  const gt=e.target.closest('[data-goto]'); if(gt){ filter=gt.dataset.goto; document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.f===filter)); renderMatches(); return; }
+  const snd=e.target.closest('#soundBtn'); if(snd){ soundOn=!soundOn; localStorage.setItem('wc26_sound',soundOn?'1':'0'); syncSoundBtn(); if(soundOn) roar(); return; }
+  const seg=e.target.closest('#seg button'); if(seg){ filter=seg.dataset.f; document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b===seg)); renderMatches(); return; }
+  const nv=e.target.closest('nav button'); if(nv){ tab=nv.dataset.tab; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b===nv)); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); $('#tab-'+tab).classList.add('on'); return; }
+  // retention: matchday-alert notification opt-in toggle
+  const nt=e.target.closest('[data-notify]'); if(nt){ if(!nt.disabled) toggleNotify(); return; }
+  // retention: share match card
+  const sh=e.target.closest('[data-share]'); if(sh){ shareMatch(sh.dataset.share); return; }
+  // retention: matchday banner → open that match
+  const mb=e.target.closest('.mdbanner'); if(mb){ openMatch(mb.dataset.id); return; }
+  // retention: bracket tie → open the underlying match (if any)
+  const bt=e.target.closest('.bktie'); if(bt&&bt.dataset.id){ openMatch(bt.dataset.id); return; }
+  // Feature 5: lock in a prediction (don't open the sheet)
+  const pk=e.target.closest('[data-pick]'); if(pk){ e.stopPropagation(); picks[pk.dataset.pick]=pk.dataset.team; localStorage.setItem('wc26_picks',JSON.stringify(picks)); if(navigator.vibrate)navigator.vibrate(15); syncBadges(); renderMatches(); renderFav(); return; }
+  const fb=e.target.closest('[data-fav]'); if(fb){ toggleFav(fb.dataset.fav); openMatch(DATA.matches.find(x=>x.home.name===fb.dataset.fav||x.away.name===fb.dataset.fav).id); return; }
+  const uf=e.target.closest('[data-unfav]'); if(uf){ toggleFav(uf.dataset.unfav); return; }
+  const mc=e.target.closest('.match'); if(mc){ openMatch(mc.dataset.id); return; }
+  if(e.target.closest('[data-close]')||e.target.id==='sheet'){ $('#sheet').classList.remove('on'); }
+});
+
+// Sample-data live ticker (also nudges a fake goal so the celebration is demoable on sample data)
+let sampleTick=0;
+setInterval(()=>{ if(DATA.source==='sample'){ const l=DATA.matches.find(m=>m.status==='live'); if(l){ l.min=Math.min(90,l.min+1);
+  sampleTick++; if(sampleTick%6===0){ const prev=snapshotScores(); if(Math.random()<.5)l.hs++; else l.as++; detectGoals(prev); syncBadges(); }
+  if(filter==='live'&&tab==='matches')renderMatches(); } } },5000);
+
+// If Live tab is empty for the current data, land on a tab that has content (Fixtures).
+function chooseDefaultFilter(){
+  if(filter!=='live') return;                 // user already moved
+  const hasLive=DATA.matches.some(m=>m.status==='live');
+  if(!hasLive){
+    const hasUp=DATA.matches.some(m=>m.status==='up');
+    if(hasUp){ filter='upcoming'; document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.f==='upcoming')); }
+    // if no upcoming either, Live stays selected and shows the countdown hero (never a dead end).
+  }
+}
+// On first ever open with no team picked, surface the picker so the app comes alive immediately.
+function maybeFirstRun(){ if(!fav.length){ openPicker(); } }
+
+// On load: pull real data from our own /api backend. Same-origin → no CORS, no key in browser.
+applyTheme(); syncPickBtn();
+realData().then(d=>{ DATA=d; lastScores=snapshotScores(); $('#databar').className='databar live'; $('#databar').textContent='● Live — football-data.org · '+d.matches.length+' matches'; chooseDefaultFilter(); syncBadges(); render(); fireMatchdayNotifications(); maybeFirstRun(); startPolling(); })
+.catch(err=>{ DATA=sampleData(); lastScores=snapshotScores(); $('#databar').className='databar sample'; $('#databar').textContent='Sample data (backend not reachable: '+err.message+')'; chooseDefaultFilter(); syncBadges(); render(); fireMatchdayNotifications(); maybeFirstRun(); });
+chooseDefaultFilter(); render();
+
+// ── Feature 3: poll real backend for score changes ──
+function startPolling(){
+  setInterval(async()=>{
+    try{
+      const d=await realData(); const prev=lastScores;
+      DATA=d; detectGoals(prev); lastScores=snapshotScores();
+      syncBadges(); fireMatchdayNotifications(); render();
+    }catch(e){/* keep last good data */}
+  }, 30000); // 30s; football-data free tier is rate-limited
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Cloudflare / Wrangler
+.wrangler/
+.dev.vars
+wrangler-account.json
+
+# Secrets — never commit
+.env
+.env.*
+*.key
+secrets.*
+
+# Dependencies
+node_modules/
+
+# OS / editor
+.DS_Store
+*.log
