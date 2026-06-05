@@ -996,6 +996,15 @@ function startPolling(){
     }catch(e){/* keep last good data */}
   }, 30000); // 30s; football-data free tier is rate-limited
 }
+
+// Keep time-based UI honest after the tab is backgrounded or suspended.
+// Browsers throttle/freeze setInterval in hidden tabs, which would otherwise
+// leave the countdown stuck on the last frame it painted (e.g. "since last night").
+// On return, re-render — this repaints immediately and restarts the per-second timers.
+function refreshOnReturn(){ if(document.visibilityState==='visible'){ render(); } }
+document.addEventListener('visibilitychange', refreshOnReturn);
+window.addEventListener('focus', refreshOnReturn);
+window.addEventListener('pageshow', refreshOnReturn);
 </script>
 </body>
 </html>
